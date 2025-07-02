@@ -7,3 +7,6 @@ awesome plan! well done! please create the actual workflow, step-by-step deploym
 
 ---
 awesome plan! now help me to create an equally awesome `README.md` for the GitHub repository to host your awesome plan and workflow. please create the `README.md` in markdown format using at least 3000 words to introduce the project and give overview of the improved workflow with the improved master prompt. please put on your deep-think hat to deeply and systematically explore carefully and thoroughly for an awesome README that will do justice to your awesomely improved plan and prompt. Please do not disappoint me! thank you and good luck!
+
+---
+awesome workflow code! please create a well thoughtout `docker-compose.yml` and `.gitignore` (for the repo). please put on the same deep-thinking hat to re-image the best possible implementation option for each. thank you and good luck!
