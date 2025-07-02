@@ -10,3 +10,7 @@ awesome plan! now help me to create an equally awesome `README.md` for the GitHu
 
 ---
 awesome workflow code! please create a well thoughtout `docker-compose.yml` and `.gitignore` (for the repo). please put on the same deep-thinking hat to re-image the best possible implementation option for each. thank you and good luck!
+
+---
+awesome job so far! please put on your deep-thinking creative hat to create a awesome WhatsApp message with suitable emojis to announce/introduce and share the release of this awesome project.
+
