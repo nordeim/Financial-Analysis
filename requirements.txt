@@ -1,0 +1,12 @@
+requests
+aiohttp
+pandas
+yfinance
+beautifulsoup4
+lxml
+jinja2
+matplotlib
+plotly
+pdfplumber
+openai
+pytest

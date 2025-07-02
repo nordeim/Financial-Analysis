@@ -1,0 +1,19 @@
+apis:
+  sec_edgar:
+    base_url: "https://data.sec.gov/api/xbrl/companyfacts"
+    headers:
+      User-Agent: "Financial Analyzer 1.0 (your-email@company.com)"
+  yahoo_finance:
+    timeout: 30
+  alpha_vantage:
+    api_key: "${ALPHA_VANTAGE_API_KEY}"
+
+reporting:
+  output_formats: ["pdf", "html", "json"]
+  chart_style: "seaborn"
+  template_path: "templates/report_template.html"
+
+logging:
+  level: "INFO"
+  file_path: "logs/financial_analyzer.log"
+
