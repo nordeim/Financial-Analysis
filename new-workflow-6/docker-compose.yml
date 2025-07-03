@@ -1,0 +1,60 @@
+# File: docker-compose.yml
+# Purpose: Defines and orchestrates the multi-service application environment.
+
+version: "3.9"
+
+services:
+  # The main application service where the financial analysis runs.
+  financial-analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: financial-analyzer
+    # The depends_on tag ensures that the Redis container is started before this one.
+    depends_on:
+      - redis
+    # The env_file directive tells Compose to read environment variables from a .env file.
+    # This is the standard way to manage environment-specific configurations and secrets.
+    env_file:
+      - .env
+    # Volumes mount host directories into the container. This is crucial for:
+    # 1. Persisting output: Reports and logs generated inside the container are saved on the host machine.
+    # 2. Live development: Changes to the source code on the host are immediately reflected inside the container.
+    volumes:
+      - ./src:/app/src
+      - ./main.py:/app/main.py
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    # Connects the service to our custom network, allowing it to communicate with Redis.
+    networks:
+      - financial-network
+    # Sets the default command to execute. This can be overridden from the command line.
+    # The default command runs an analysis for MSFT.
+    command: >
+      python3 main.py --ticker MSFT
+    # Ensures the container restarts automatically if it crashes.
+    restart: unless-stopped
+
+  # The Redis service for caching API responses.
+  redis:
+    # Uses the official Redis image with an Alpine base for a smaller footprint.
+    image: redis:7-alpine
+    container_name: financial-redis
+    # Connects the Redis service to the same custom network.
+    networks:
+      - financial-network
+    # Mounts a named volume to persist Redis data across container restarts.
+    # This means our cache survives even if the container is stopped and started.
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+# Named volumes are managed by Docker and are the preferred way to persist data.
+volumes:
+  redis-data:
+
+# Defining a custom bridge network is a security best practice. It isolates our
+# application services from other containers running on the Docker host.
+networks:
+  financial-network:
+    driver: bridge
