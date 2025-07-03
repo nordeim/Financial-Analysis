@@ -40,3 +40,16 @@ awesome job so far! please put on your deep-thinking creative hat to create a aw
 ---
 awesome workflow! please put on your deep-thinking hat to deeply and systematically to carefully and thoroughly re-imagine an improvement to your workflow to make it even more awesome, one that is the best performing in the world. please try your very best to research and validate for your new attempt. thank you and good luck!
 
+---
+Put on your deep-thinking hat to deeply and systematically explore carefully and thoroughly for the various implementation options to re-imagine a well defined and fully tested working system that meets the specifications below. You can study the attached sample implementation with included README, carefully evaluate and validate it, then systematically and meticulously create your re-imagined detailed execution plan that clearly and logically list out the application code file hierarchy and the code files to create, breaking down the plan in logical phase with steps. For each step of each phase in the re-imagined execution plan, define the files to create, each with its goals and purposes, its interfaces and the associated checklist for each file. Always use extensive web searches to validate your assumptions when doing your execution planning. Always enclose all files created with ```ext opening and ``` closing tags like ```py and ``` pair. The first line of each file created should be a comment line with the full path filename in the following format:
+
+```py
+# File: <filename with path>
+... # follow by the actual code file content
+```
+
+Please let me review your awesome re-imagined execution plan with integrated for approval before proceeding. Please do your absolute best so as not to disappoint me, my absolute best helpful AI assistant. Thank you and good luck!
+
+---
+awesome plan! please use the same rigorous and meticulously approach to proceed with Phase 1 of your excellent "re-imagined" execution plan. Remember to explore carefully for multiple implementation options before choosing the most optimal and elegant solution to implement the changes. so you have to think deeply and systematically to explore all options and not just choose any option you may think of. also make sure you make a detailed execution plan with an integrated checklist for each step, before proceeding cautiously step by step. after completing each step, always double-check and validate your changes for that step against its checklist before proceeding to the next step. remember to always create a *complete* and updated replacement or new file for the affected files, enclose each complete and updated replacement file within ```py (or ```sql or ```js or or ```ts or ```tsx ```php extension) opening and ``` closing tags. after creating each file, use line by line "diff" command to double-check and validate the created file. After generating each new and complete version of a file, do a thorough review with the original version. after creating each file, use line by line "diff" command to double-check and validate the created file. Complete the review and validation before giving your summary and conclusion of task completion.
+

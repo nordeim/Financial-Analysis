@@ -1,0 +1,17 @@
+# File: requirements.txt
+# Purpose: Defines project dependencies for a reproducible environment.
+
+# --- Core Libraries ---
+pandas~=2.2.0
+pydantic~=2.7.0
+pydantic-settings~=2.2.0
+openpyxl~=3.1.0
+requests~=2.31.0
+
+# --- Data Source Specific Libraries ---
+yfinance~=0.2.37
+sec-edgar-api~=1.0.0
+
+# --- Development & Testing (can be in a separate requirements-dev.txt later) ---
+pytest~=8.2.0
+requests-mock~=1.12.0
