@@ -17,6 +17,7 @@ from financial_analysis.services.data_service import DataService
 from financial_analysis.services.calculation_service import CalculationService
 from financial_analysis.services.analysis_service import AnalysisService
 from financial_analysis.data_providers.sec_edgar_provider import SecEdgarProvider
+from financial_analysis.data_providers.yfinance_provider import YFinanceProvider
 from financial_analysis.reporting.text_reporter import TextReporter
 from financial_analysis.reporting.excel_reporter import ExcelReporter
 
@@ -45,11 +46,14 @@ def main():
 
     try:
         # --- Dependency Injection Setup ---
-        # 1. Instantiate Providers (add more providers here in the future)
+        # 1. Instantiate Providers
         sec_provider = SecEdgarProvider()
+        yfinance_provider = YFinanceProvider()
         
         # 2. Instantiate Services
-        data_service = DataService(providers=[sec_provider])
+        # The order of providers matters: the first is the primary source for statements.
+        # Subsequent providers are used for enrichment and as fallbacks.
+        data_service = DataService(providers=[sec_provider, yfinance_provider])
         calculation_service = CalculationService()
         analysis_service = AnalysisService()
         

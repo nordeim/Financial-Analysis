@@ -1,4 +1,4 @@
-# File: docker-compose.yml
+# File: docker-compose-dev.yml
 # Purpose: Defines and orchestrates the multi-service application environment.
 
 version: "3.9"
@@ -23,18 +23,17 @@ services:
     volumes:
       - ./src:/app/src
       - ./main.py:/app/main.py
-      - ./tests:/app/tests # Mount tests for easy execution
+      - ./tests:/app/tests
       - ./reports:/app/reports
       - ./logs:/app/logs
     # Connects the service to our custom network, allowing it to communicate with Redis.
     networks:
       - financial-network
-    # Sets the default command to execute. This can be overridden from the command line.
-    # The default command runs an analysis for MSFT.
-    command: >
-      python3 main.py --ticker MSFT
-    # MODIFIED: Changed restart policy to 'no' for this task-based container.
-    # It will run once and exit, which is the desired behavior.
+    # MODIFIED: Changed the command to a long-running process.
+    # This keeps the container alive so we can run interactive commands inside it.
+    command: tail -f /dev/null
+    # The restart policy is now less critical, but 'no' is still appropriate
+    # for a development/interactive container.
     restart: no
 
   # The Redis service for caching API responses.
@@ -61,3 +60,4 @@ volumes:
 networks:
   financial-network:
     driver: bridge
+

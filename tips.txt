@@ -10,7 +10,7 @@ python3 extract_code_files.py  oo1
 find app -type f
 
 rsync -av app src /cdrom/project/Financial-Analysis/
-rsync -av app src /cdrom/project/Financial-Analysis/new-workflow-6/
+rsync -av main.py src /cdrom/project/Financial-Analysis/new-workflow-6/ 
 
 cd .. ; pwd ; rm -rf ttt4
 

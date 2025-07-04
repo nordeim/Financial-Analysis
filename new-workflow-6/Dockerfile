@@ -4,7 +4,7 @@
 # --- Stage 1: Base Image ---
 # Use a specific version of the official Python slim image for reproducibility and security.
 # 'bookworm' is the stable Debian release corresponding to Python 3.11, ensuring a lean yet complete OS.
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim
 
 # --- Metadata ---
 LABEL maintainer="CodeNavigator AI"

@@ -3,7 +3,7 @@
 # Using Pydantic models ensures data integrity and validation at runtime.
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 # It's good practice to use aliases for long XBRL-like names to keep our code clean,
@@ -106,8 +106,9 @@ class CompanyAnalysis(BaseModel):
     company_info: CompanyInfo
     historical_statements: List[FinancialStatement]
     historical_ratios: List[FinancialRatios]
-    qualitative_analysis: Dict[str, str] # e.g., {'liquidity': '...', 'profitability': '...'}
+    qualitative_analysis: Dict[str, Any] # MODIFIED: Changed from Dict[str, str] to Dict[str, Any] to accommodate lists for strengths/concerns.
     
     # Report Metadata
     analysis_date: datetime = Field(default_factory=datetime.utcnow)
     data_sources_used: List[str]
+

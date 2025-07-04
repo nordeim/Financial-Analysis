@@ -25,13 +25,15 @@ class TextReporter(BaseReporter):
         """Constructs the full report string from various formatted sections."""
         sections = [
             self._format_header(analysis),
+            self._format_company_profile(analysis), # MODIFIED: Added company profile section
             self._format_summary(analysis),
             self._format_ratios_table(analysis),
             self._format_detailed_analysis(analysis),
             self._format_financial_statements(analysis),
             self._format_disclaimer(analysis)
         ]
-        return "\n\n".join(sections)
+        # Filter out any empty sections before joining
+        return "\n\n".join(filter(None, sections))
 
     def _format_header(self, analysis: CompanyAnalysis) -> str:
         info = analysis.company_info
@@ -44,6 +46,18 @@ class TextReporter(BaseReporter):
             f"Industry:        {info.industry or 'N/A'}\n"
             f"Analysis Date:   {date_str}"
         )
+
+    def _format_company_profile(self, analysis: CompanyAnalysis) -> str:
+        """Formats the company description section. Returns empty string if no description."""
+        info = analysis.company_info
+        if not info.description:
+            return "" # Return empty string if no description exists, filter() will remove it.
+        
+        header = f"COMPANY PROFILE\n{'-' * 25}"
+        # Fill description to 80 characters width
+        wrapped_text = textwrap.fill(info.description, width=80)
+        
+        return f"{header}\n{wrapped_text}"
 
     def _format_summary(self, analysis: CompanyAnalysis) -> str:
         qual_analysis = analysis.qualitative_analysis

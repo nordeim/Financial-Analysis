@@ -17,9 +17,32 @@ from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# (XBRL_TAG_MAP remains the same as before)
+# MODIFIED: Expanded the tag map with more common aliases to improve parsing robustness.
 XBRL_TAG_MAP = {
-    "revenue": ["Revenues", "SalesRevenueNet", "TotalRevenues"], "cost_of_goods_sold": ["CostOfGoodsAndServicesSold", "CostOfRevenue"], "gross_profit": ["GrossProfit"], "operating_income": ["OperatingIncomeLoss"], "interest_expense": ["InterestExpense"], "net_income": ["NetIncomeLoss"], "eps_diluted": ["EarningsPerShareDiluted"], "eps_basic": ["EarningsPerShareBasic"], "cash_and_equivalents": ["CashAndCashEquivalentsAtCarryingValue"], "accounts_receivable": ["AccountsReceivableNetCurrent"], "inventory": ["InventoryNet"], "current_assets": ["AssetsCurrent"], "total_assets": ["Assets"], "current_liabilities": ["LiabilitiesCurrent"], "total_liabilities": ["Liabilities"], "total_debt": ["LongTermDebtAndCapitalLeaseObligations", "DebtCurrent"], "shareholders_equity": ["StockholdersEquity"], "shares_outstanding": ["WeightedAverageNumberOfDilutedSharesOutstanding", "WeightedAverageNumberOfSharesOutstandingBasic"], "operating_cash_flow": ["NetCashProvidedByUsedInOperatingActivities"], "capital_expenditures": ["PaymentsToAcquirePropertyPlantAndEquipment"], "dividend_payments": ["PaymentsOfDividends"],
+    # Income Statement
+    "revenue": ["Revenues", "SalesRevenueNet", "TotalRevenues", "RevenueFromContractWithCustomerExcludingAssessedTax"],
+    "cost_of_goods_sold": ["CostOfGoodsAndServicesSold", "CostOfRevenue"],
+    "gross_profit": ["GrossProfit"],
+    "operating_income": ["OperatingIncomeLoss"],
+    "interest_expense": ["InterestExpense"],
+    "net_income": ["NetIncomeLoss", "ProfitLoss"],
+    "eps_diluted": ["EarningsPerShareDiluted"],
+    "eps_basic": ["EarningsPerShareBasic"],
+    # Balance Sheet
+    "cash_and_equivalents": ["CashAndCashEquivalentsAtCarryingValue"],
+    "accounts_receivable": ["AccountsReceivableNetCurrent"],
+    "inventory": ["InventoryNet"],
+    "current_assets": ["AssetsCurrent"],
+    "total_assets": ["Assets"],
+    "current_liabilities": ["LiabilitiesCurrent"],
+    "total_liabilities": ["Liabilities"],
+    "total_debt": ["DebtCurrent", "LongTermDebt", "LongTermDebtAndCapitalLeaseObligations", "LongTermDebtNoncurrent"],
+    "shareholders_equity": ["StockholdersEquity", "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"],
+    "shares_outstanding": ["WeightedAverageNumberOfDilutedSharesOutstanding", "WeightedAverageNumberOfSharesOutstandingBasic"],
+    # Cash Flow Statement
+    "operating_cash_flow": ["NetCashProvidedByUsedInOperatingActivities"],
+    "capital_expenditures": ["PaymentsToAcquirePropertyPlantAndEquipment"],
+    "dividend_payments": ["PaymentsOfDividends"],
 }
 
 
@@ -49,7 +72,6 @@ class SecEdgarProvider(BaseDataProvider):
 
     def _get_with_cache(self, cache_key: str, url: str) -> Dict[str, Any]:
         """Generic getter that checks cache first, then falls back to HTTP GET."""
-        # 1. Try to get from cache
         if self._redis_client:
             cached_data = self._redis_client.get(cache_key)
             if cached_data:
@@ -57,13 +79,11 @@ class SecEdgarProvider(BaseDataProvider):
                 return json.loads(cached_data)
         
         logger.info(f"Cache MISS for key: {cache_key}. Fetching from URL: {url}")
-        # 2. Fallback to network request
         try:
             response = self._session.get(url)
             response.raise_for_status()
             data = response.json()
             
-            # 3. Store in cache if successful
             if self._redis_client:
                 self._redis_client.setex(
                     cache_key,
@@ -91,9 +111,6 @@ class SecEdgarProvider(BaseDataProvider):
         facts_url = f"{self.BASE_URL}/api/xbrl/companyfacts/CIK{cik}.json"
         return self._get_with_cache(cache_key, facts_url)
 
-    # _get_cik and the rest of the class methods (get_company_info, get_financial_statements)
-    # remain the same as the previous implementation, as they now automatically benefit from
-    # the cached `_load_cik_map` and `_get_company_facts` methods.
     def _get_cik(self, ticker: str) -> str:
         ticker = ticker.upper()
         cik_map = self._load_cik_map()
@@ -118,32 +135,48 @@ class SecEdgarProvider(BaseDataProvider):
         if "facts" not in facts or "us-gaap" not in facts["facts"]:
             raise DataProviderError(f"No US-GAAP facts found for CIK {cik}.")
         gaap_facts = facts["facts"]["us-gaap"]
-        def get_fact_data(metric_key: str) -> Optional[Dict]:
+        
+        def get_fact_data(metric_key: str) -> List[Dict]:
+            """Finds all matching tags and returns their data lists."""
+            all_items = []
             for tag in XBRL_TAG_MAP.get(metric_key, []):
-                if tag in gaap_facts:
-                    return gaap_facts[tag]
-            return None
+                if tag in gaap_facts and "units" in gaap_facts[tag] and "USD" in gaap_facts[tag]["units"]:
+                    all_items.extend(gaap_facts[tag]["units"]["USD"])
+            return all_items
+
         annual_data = defaultdict(lambda: defaultdict(dict))
-        for metric, tags in XBRL_TAG_MAP.items():
-            fact_data = get_fact_data(metric)
-            if not fact_data or "units" not in fact_data: continue
-            if "USD" in fact_data["units"]:
-                for item in fact_data["units"]["USD"]:
-                    if item.get("form") == "10-K" and item.get("fp") == "FY":
-                        fy = item["fy"]
-                        end_date = datetime.strptime(item["end"], "%Y-%m-%d")
-                        annual_data[fy][metric] = item["val"]
-                        annual_data[fy]["end_date"] = end_date
+        
+        # Aggregate data from all possible tags
+        aggregated_facts = defaultdict(list)
+        for metric in XBRL_TAG_MAP:
+            aggregated_facts[metric] = get_fact_data(metric)
+            
+        # Group by fiscal year
+        for metric, items in aggregated_facts.items():
+            for item in items:
+                if item.get("form") == "10-K" and item.get("fp") == "FY":
+                    fy = item["fy"]
+                    # Sum values if multiple tags contribute to one metric (e.g., total_debt)
+                    annual_data[fy][metric] = annual_data[fy].get(metric, 0) + item["val"]
+                    if "end_date" not in annual_data[fy]:
+                         annual_data[fy]["end_date"] = datetime.strptime(item["end"], "%Y-%m-%d")
+
         statements = []
         sorted_years = sorted(annual_data.keys(), reverse=True)
+        
         for year in sorted_years[:num_years]:
             data = annual_data[year]
+            if "end_date" not in data: continue # Skip years with incomplete data
+            
             def d(key): return data.get(key)
-            total_debt_val = (d("total_debt") or 0) + (d("debt_current_from_tag") or 0)
+            
             income_stmt = IncomeStatement(revenue=d("revenue"), cost_of_goods_sold=d("cost_of_goods_sold"), gross_profit=d("gross_profit"), operating_income=d("operating_income"), interest_expense=d("interest_expense"), net_income=d("net_income"), eps_diluted=d("eps_diluted"), eps_basic=d("eps_basic"))
-            balance_sheet = BalanceSheet(total_assets=d("total_assets"), current_assets=d("current_assets"), cash_and_equivalents=d("cash_and_equivalents"), inventory=d("inventory"), accounts_receivable=d("accounts_receivable"), total_liabilities=d("total_liabilities"), current_liabilities=d("current_liabilities"), total_debt=total_debt_val if total_debt_val > 0 else None, shareholders_equity=d("shareholders_equity"), shares_outstanding=d("shares_outstanding"))
+            balance_sheet = BalanceSheet(total_assets=d("total_assets"), current_assets=d("current_assets"), cash_and_equivalents=d("cash_and_equivalents"), inventory=d("inventory"), accounts_receivable=d("accounts_receivable"), total_liabilities=d("total_liabilities"), current_liabilities=d("current_liabilities"), total_debt=d("total_debt"), shareholders_equity=d("shareholders_equity"), shares_outstanding=d("shares_outstanding"))
             cash_flow_stmt = CashFlowStatement(operating_cash_flow=d("operating_cash_flow"), capital_expenditures=d("capital_expenditures"), dividend_payments=d("dividend_payments"))
+            
             statements.append(FinancialStatement(ticker=ticker.upper(), period="FY", fiscal_year=year, end_date=data["end_date"], income_statement=income_stmt, balance_sheet=balance_sheet, cash_flow_statement=cash_flow_stmt, source_url=f"{self.BASE_URL}/api/xbrl/companyfacts/CIK{cik}.json"))
+            
         if not statements:
             raise DataProviderError(f"Could not construct any financial statements for {ticker}. The company might not file 10-Ks or data is unavailable.")
+        
         return statements

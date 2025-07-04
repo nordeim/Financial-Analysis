@@ -156,4 +156,45 @@ Running a command _inside_ an existing container can be done either directly via
   ```
 
 - Remember that `docker compose exec` won’t start a stopped container. If your service is down, first `docker compose up -d` it.
-- 
+
+---
+# What `--no-cache-dir` Does in `pip install`
+
+Using the `--no-cache-dir` flag tells pip not to save or use its local cache of downloaded packages and wheels. By default, pip caches downloaded archives (e.g., `.whl` or `.tar.gz`) in a directory (usually `~/.cache/pip/`) so that future installs of the same package version are faster and don’t require re-downloading. When you add `--no-cache-dir`, pip:
+
+- Downloads each package directly from the source URL, ignoring any previously cached files.  
+- Does not write newly downloaded package files to its cache directory.  
+
+---
+
+## Why Use `--no-cache-dir`?
+
+- **Reduce image size in container builds**  
+  Cached package files aren’t stored in your Docker image layers, keeping the final image leaner.  
+
+- **Avoid stale or corrupted caches**  
+  If a previous download in the cache is incomplete or corrupted, disabling the cache forces a fresh fetch.  
+
+- **Ensure you always get the latest build of a given version**  
+  Rarely, package sources might rebuild wheels with the same version number; bypassing the cache guarantees you fetch the newest copy.
+
+---
+
+## Trade-Offs
+
+- **Longer install times**  
+  Since every package is fetched from the internet on each run, installs take longer, especially in low-bandwidth environments.  
+
+- **Higher network usage**  
+  You incur repeated downloads of the same packages, which can be a drawback if bandwidth or rate limits are a concern.
+
+---
+
+## When to Use It
+
+- In **Dockerfile** or CI pipelines where caching files across builds is unnecessary.  
+- If you’ve experienced **cache corruption** or need to enforce a completely fresh installation.  
+- When you want **tight control** over image layers and minimize on-disk artifacts.
+
+Feel free to ask if you want more tips on optimizing Docker builds or pip usage!
+
