@@ -45,7 +45,7 @@
             <strong>Data Quality:</strong> {{ data_quality }}
         </div>
         <div class="footer">
-            Generated at {{ now.isoformat() if now is defined else "" }}
+            Generated at {{ now().isoformat() }}
         </div>
     </div>
 </body>
