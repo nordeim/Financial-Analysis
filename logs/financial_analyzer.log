@@ -1,0 +1,18 @@
+2025-07-05 16:08:39,104 - INFO - __main__ - Starting analysis for AAPL
+2025-07-05 16:08:39,417 - INFO - data_retriever - Found CIK 320193 for AAPL: Apple Inc.
+2025-07-05 16:08:42,098 - INFO - data_retriever - SEC filings retrieved for CIK 320193
+2025-07-05 16:08:43,038 - INFO - data_retriever - Fetched market data for AAPL
+2025-07-05 16:08:43,043 - INFO - data_extractor - Extracted Revenue: 5 years
+2025-07-05 16:08:43,047 - INFO - data_extractor - Extracted NetIncome: 5 years
+2025-07-05 16:08:43,049 - INFO - data_extractor - Extracted TotalAssets: 5 years
+2025-07-05 16:08:43,052 - INFO - data_extractor - Extracted TotalLiabilities: 5 years
+2025-07-05 16:08:43,054 - INFO - data_extractor - Extracted StockholdersEquity: 5 years
+2025-07-05 16:08:43,057 - INFO - data_extractor - Extracted OperatingIncome: 5 years
+2025-07-05 16:08:43,060 - INFO - data_extractor - Extracted CurrentAssets: 5 years
+2025-07-05 16:08:43,062 - INFO - data_extractor - Extracted CurrentLiabilities: 5 years
+2025-07-05 16:08:43,065 - INFO - data_extractor - Extracted Cash: 5 years
+2025-07-05 16:08:43,067 - INFO - data_extractor - Extracted OperatingCashFlow: 5 years
+2025-07-05 16:08:43,068 - INFO - ratio_calculator - Ratios calculated successfully
+2025-07-05 16:08:43,069 - INFO - analysis - Analysis composed
+2025-07-05 16:08:43,088 - INFO - report_generator - Report generated for AAPL: {'json': 'reports/AAPL_20250705_160843_report.json', 'html': 'reports/AAPL_20250705_160843_report.html'}
+2025-07-05 16:08:43,088 - INFO - __main__ - Analysis complete! Output files:
