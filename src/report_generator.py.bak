@@ -28,10 +28,8 @@ class ReportGenerator:
         if output_format in ("html", "both"):
             template = self.env.get_template("report_template.html")
             html_file = output_dir / f"{ticker}_{datetime.now():%Y%m%d_%H%M%S}_report.html"
-            # Pass 'now' to the template context as a datetime object, and flatten report_data for template context
-            context = {**report_data, "company_name": company_name, "now": datetime.now()}
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(template.render(**context))
+            with open(html_file, "w") as f:
+                f.write(template.render(**report_data))
             files["html"] = str(html_file)
 
         logger.info(f"Report generated for {ticker}: {files}")
